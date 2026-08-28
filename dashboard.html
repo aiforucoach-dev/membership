@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Modul & Materi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // Supabase Configuration
+        const SUPABASE_URL = 'https://sbxqnvzknjvazbxwtyub.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_kvo_zfIJwnKJIQRQwQa6Cg_xuOw_Ak6';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // PROTEKSI HALAMAN: Cek Sesi Login (Jika belum login, tendang balik ke index.html)
+        async function cekSesiLogin() {
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            if (!session || error) {
+                window.location.href = 'index.html';
+            }
+        }
+        cekSesiLogin();
+
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#0a1fdb',
+                            bg: '#F6F6F4',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0a1fdb;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 48px 48px;
+            background-position: center top;
+        }
+        
+        .card-shadow {
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.12);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-blue selection:text-white">
+    
+    <!-- Tombol Logout di Pojok Kanan Atas -->
+    <div class="w-full max-w-7xl mx-auto px-4 md:px-8 pt-6 flex justify-end relative z-20">
+        <button onclick="handleLogout()" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-4 py-2 rounded-xl text-sm transition-all border border-white/20 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <span>Logout</span>
+        </button>
+    </div>
+
+    <main class="flex-grow flex flex-col items-center py-6 px-4 md:px-8 relative z-10 w-full max-w-7xl mx-auto">
+        
+        <!-- Header Image -->
+        <div class="mb-8 md:mb-12 text-center w-full max-w-[220px] md:max-w-[320px]">
+             <img 
+                src="https://lh3.googleusercontent.com/d/1cCYxTxkXdW7qBzV0T27LBb3A81NEwkRB" 
+                alt="Menu Materi Headline" 
+                class="w-full object-contain drop-shadow-sm"
+                onerror="this.onerror=null; this.src='https://placehold.co/600x200/transparent/0a1fdb?text=Menu+Materi'; this.alt='Image Failed to Load'"
+            >
+        </div>
+
+        <!-- Card Grid Container -->
+        <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 w-full">
+            <!-- Cards populated via JS -->
+        </div>
+
+    </main>
+
+    <script>
+        // Default Data Modul
+        const defaultModules = [
+            {
+                number: '01',
+                title: 'Prompt Maker',
+                description: 'Teknik dan rahasia membuat prompt AI yang efektif dan akurat.',
+                image_url: 'https://lh3.googleusercontent.com/d/1M7ElSxqFYsBu_VbyFpbA3cGKgSSp6Aka',
+                fallback_bg: '0a1fdb'
+            },
+            {
+                number: '02',
+                title: 'Instagram Branding',
+                description: 'Strategi membangun identitas dan jangkauan brand di Instagram.',
+                image_url: 'https://lh3.googleusercontent.com/d/1RnMVHvOHLCqJz03iYOCOWgaLxenldCpE',
+                fallback_bg: 'ec4899'
+            },
+            {
+                number: '03',
+                title: 'UGC',
+                description: 'Panduan membuat dan mengoptimalkan User Generated Content.',
+                image_url: 'https://lh3.googleusercontent.com/d/1jHyYX0wnwcuKeqNP-dLvy8lejvS46_Rp',
+                fallback_bg: '0284c7'
+            },
+            {
+                number: '04',
+                title: 'Produk (Foto & Video)',
+                description: 'Katalog dan teknik pengambilan aset visual khusus produk.',
+                image_url: 'https://lh3.googleusercontent.com/d/1G4tEAWYiF4wezZrTlQrj-8gN3k9zJtAB',
+                fallback_bg: '059669'
+            },
+            {
+                number: '05',
+                title: 'Foto dan video',
+                description: 'Fundamental esensial dunia fotografi dan videografi.',
+                image_url: 'https://lh3.googleusercontent.com/d/16J6XTYIKoQkeacZnS66IlCUb-0iGdTMi',
+                fallback_bg: '7c3aed'
+            },
+            {
+                number: '06',
+                title: 'Membuat tools',
+                description: 'Cara menciptakan alat dan sistem automasi untuk alur kerja Anda.',
+                image_url: 'https://lh3.googleusercontent.com/d/1N_KGMftVMHMB9og7LoAcc-BeFPfrO4Kj',
+                fallback_bg: 'ea580c'
+            },
+            {
+                number: '07',
+                title: 'Affiliate',
+                description: 'Trik sukses mendapatkan cuan dari program afiliasi (Affiliate Marketing).',
+                image_url: 'https://lh3.googleusercontent.com/d/1PmuvK8a1TbHDd-RVriV9v-bbnesvHuGa',
+                fallback_bg: 'e11d48'
+            },
+            {
+                number: '08',
+                title: 'Trik Lain-lain',
+                description: 'Kumpulan trik random dan insight tambahan (Weavy, dll).',
+                image_url: 'https://lh3.googleusercontent.com/d/1Z9XZsEei6U1VfP74FelKUhBDB_JWpIac',
+                fallback_bg: '334155'
+            },
+            {
+                number: '09',
+                title: 'Ebook',
+                description: 'Panduan menyusun, menerbitkan, dan mendistribusikan e-book.',
+                image_url: 'https://lh3.googleusercontent.com/d/18hENaHWnJpWugvDC3fKlH259pmKVj7th',
+                fallback_bg: '2563eb'
+            },
+            {
+                number: '10',
+                title: 'Alur Film',
+                description: 'Teknik breakdown alur cerita film dan membuat tools pendukungnya.',
+                image_url: 'https://lh3.googleusercontent.com/d/1L0XElDnFwHyjUC1AnxkWGHMJQcnmv7tl',
+                fallback_bg: '18181b'
+            },
+            {
+                number: '11',
+                title: 'YT Asmr',
+                description: 'Cara memproduksi video YouTube ASMR yang menarik dan menenangkan.',
+                image_url: 'https://lh3.googleusercontent.com/d/1ZLfxs2f__5Q8_KUDNRZvsGtn9Ai4A62L',
+                fallback_bg: '9333ea'
+            },
+            {
+                number: '12',
+                title: 'Web & Landing Page',
+                description: 'Panduan membuat website dan landing page yang menarik serta tinggi konversi.',
+                image_url: 'https://lh3.googleusercontent.com/d/1nRDKNZQeUyA4-SZX12CeOH80BDTTUgKH',
+                fallback_bg: '0d9488'
+            }
+        ];
+
+        function renderCards(modules) {
+            const container = document.getElementById('cardsGrid');
+            if (!container) return;
+
+            container.innerHTML = modules.map((item, index) => {
+                const numberFormatted = item.number || String(index + 1).padStart(2, '0');
+                const title = item.title || 'Materi Modul';
+                const description = item.description || '';
+                const imageUrl = item.image_url || '';
+                const fallbackBg = item.fallback_bg || '0a1fdb';
+
+                return `
+                    <div class="group relative block w-full bg-white p-3.5 rounded-[32px] card-shadow border border-white hover:-translate-y-2 hover:shadow-2xl transition-all duration-300 select-none">
+                        <div class="absolute -top-4 -right-4 bg-slate-900 text-white font-bold text-base w-12 h-12 flex items-center justify-center rounded-[16px] shadow-xl border-4 border-white z-20 group-hover:rotate-6 group-hover:scale-110 transition-transform duration-300">
+                            ${numberFormatted}
+                        </div>
+                        
+                        <div class="relative w-full h-44 rounded-[24px] overflow-hidden mb-6 bg-slate-100 flex items-center justify-center">
+                            <img 
+                                src="${imageUrl}" 
+                                alt="${title}" 
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                onerror="this.onerror=null; this.src='https://placehold.co/400x240/${fallbackBg}/ffffff?text=${encodeURIComponent(title)}';"
+                            >
+                        </div>
+
+                        <div class="px-3 pb-3">
+                            <div class="flex items-center gap-1.5 mb-3">
+                                <h2 class="text-[20px] font-bold tracking-tight text-slate-900">${title}</h2>
+                            </div>
+                            <p class="text-slate-500 text-sm leading-relaxed">
+                                ${description}
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadSupabaseData() {
+            renderCards(defaultModules);
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('modules')
+                    .select('*')
+                    .order('number', { ascending: true });
+
+                if (!error && data && data.length > 0) {
+                    renderCards(data);
+                }
+            } catch (err) {
+                console.warn('Menggunakan data default lokal.');
+            }
+        }
+
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSupabaseData();
+        });
+    </script>
+</body>
+</html>
