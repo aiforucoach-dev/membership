@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Login - Supabase Integration</title>
+    <!-- Tailwind CSS Script -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client UMD -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            blue: '#0a1fdb',
+                            bg: '#F6F6F4',
+                        }
+                    },
+                    keyframes: {
+                        goyang: {
+                            '0%, 100%': { transform: 'rotate(-1deg)' },
+                            '50%': { transform: 'rotate(1deg)' },
+                        }
+                    },
+                    animation: {
+                        'goyang': 'goyang 3s ease-in-out infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #0a1fdb;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 48px 48px;
+            background-position: center top;
+        }
+        
+        .card-shadow {
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-blue selection:text-white justify-between">
+
+    <main class="flex-grow flex flex-col items-center justify-center py-12 px-4 relative z-10 w-full max-w-lg mx-auto">
+        
+        <!-- Logo or Header Title Graphic -->
+        <div class="mb-10 text-center w-full max-w-[240px] md:max-w-[280px]">
+             <img 
+                src="https://lh3.googleusercontent.com/d/1cCYxTxkXdW7qBzV0T27LBb3A81NEwkRB" 
+                alt="Brand Headline" 
+                class="w-full object-contain drop-shadow-sm brightness-0 invert"
+                onerror="this.onerror=null; this.src='https://placehold.co/600x200/transparent/ffffff?text=MEMBER+LOGIN'; this.alt='Image Failed to Load'"
+            >
+        </div>
+
+        <div class="w-full bg-white p-8 md:p-10 rounded-[32px] card-shadow border border-white transition-all duration-300">
+            
+            <div class="mb-8 text-center md:text-left flex justify-between items-center">
+                <div>
+                    <h1 id="formTitle" class="text-2xl md:text-[28px] font-bold tracking-tight text-slate-900 mb-2">Member Login</h1>
+                    <p id="formSubtitle" class="text-slate-500 text-sm">Silakan masukkan detail akun Anda untuk melanjutkan</p>
+                </div>
+            </div>
+
+            <!-- Auth Form (Login / Register) -->
+            <form id="authForm" onsubmit="handleAuthSubmit(event)" class="space-y-5">
+                
+                <!-- Email Field -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2" for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        required 
+                        placeholder="nama@email.com"
+                        class="w-full px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:bg-white transition-all"
+                    >
+                </div>
+
+                <!-- Password Field -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2" for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        required 
+                        placeholder="••••••••"
+                        class="w-full px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-blue focus:bg-white transition-all"
+                    >
+                </div>
+
+                <!-- Remember Me & Forgot Password Row (Only shown on Login mode) -->
+                <div id="loginExtra" class="flex items-center justify-between text-sm pt-1">
+                    <label class="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input type="checkbox" id="remember" class="w-4 h-4 rounded border-slate-300 text-brand-blue focus:ring-brand-blue accent-[#0a1fdb]">
+                        <span class="text-slate-600 font-medium">Remember Me</span>
+                    </label>
+                    <a href="#forgot" onclick="showNotification('Fitur Lupa Password', 'Silakan hubungi administrator untuk mereset password Anda.')" class="text-brand-blue font-semibold hover:underline">Lupa Password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="w-full mt-2 py-4 px-6 rounded-2xl bg-[#0a1fdb] hover:bg-blue-800 text-white font-bold text-base shadow-lg shadow-blue-500/25 hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 flex items-center justify-center gap-2"
+                >
+                    <span id="submitBtnText">Login</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </form>
+
+            <!-- Toggle Mode & Extra Links -->
+            <div class="mt-8 pt-6 border-t border-slate-100 text-center flex flex-col sm:flex-row items-center justify-center gap-1.5 text-sm text-slate-500">
+                <span id="togglePrompt">Belum punya akun?</span>
+                <button type="button" onclick="toggleAuthMode()" id="toggleBtn" class="text-slate-900 font-bold hover:text-brand-blue transition-colors underline underline-offset-4 decoration-slate-300">
+                    Daftar Akun Baru
+                </button>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-white/70 text-xs relative z-10">
+        &copy; 2026 Design Testing. All rights reserved.
+    </footer>
+
+    <!-- Custom Notification Box -->
+    <div id="notificationModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl scale-95 transition-transform duration-300" id="notificationCard">
+            <div id="notifIcon" class="w-12 h-12 bg-blue-100 text-brand-blue rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">i</div>
+            <h3 id="notifTitle" class="text-lg font-bold text-slate-900 mb-2">Informasi</h3>
+            <p id="notifMessage" class="text-slate-500 text-sm mb-6">Pesan notifikasi...</p>
+            <button onclick="closeNotification()" class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all">Tutup</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Supabase & UI Interactivity -->
+    <script>
+        // Inisialisasi Supabase Client
+        const supabaseUrl = 'https://sbxqnvzknjvazbxwtyub.supabase.co';
+        const supabaseKey = 'sb_publishable_kvo_zfIJwnKJIQRQwQa6Cg_xuOw_Ak6';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        let isLoginMode = true;
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            const formTitle = document.getElementById('formTitle');
+            const formSubtitle = document.getElementById('formSubtitle');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const loginExtra = document.getElementById('loginExtra');
+            const togglePrompt = document.getElementById('togglePrompt');
+            const toggleBtn = document.getElementById('toggleBtn');
+
+            if (isLoginMode) {
+                formTitle.textContent = 'Member Login';
+                formSubtitle.textContent = 'Silakan masukkan detail akun Anda untuk melanjutkan';
+                submitBtnText.textContent = 'Login';
+                loginExtra.classList.remove('hidden');
+                togglePrompt.textContent = 'Belum punya akun?';
+                toggleBtn.textContent = 'Daftar Akun Baru';
+            } else {
+                formTitle.textContent = 'Pendaftaran Member';
+                formSubtitle.textContent = 'Buat akun baru untuk mengakses sistem';
+                submitBtnText.textContent = 'Daftar Sekarang';
+                loginExtra.classList.add('hidden');
+                togglePrompt.textContent = 'Sudah punya akun?';
+                toggleBtn.textContent = 'Login di sini';
+            }
+        }
+
+        async function handleAuthSubmit(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+
+            try {
+                if (isLoginMode) {
+                    // Proses Login Supabase Auth
+                    const { data, error } = await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password,
+                    });
+
+                    if (error) throw error;
+
+                    showNotification('Login Berhasil!', `Selamat datang kembali, ${data.user.email}`);
+                    setTimeout(() => {
+                        // Anda bisa mengarahkan ke halaman dashboard di sini
+                        // window.location.href = 'dashboard.html';
+                    }, 1500);
+
+                } else {
+                    // Proses Registrasi Supabase Auth
+                    const { data, error } = await supabaseClient.auth.signUp({
+                        email: email,
+                        password: password,
+                    });
+
+                    if (error) throw error;
+
+                    showNotification('Registrasi Berhasil!', 'Akun berhasil dibuat. Silakan cek email Anda untuk verifikasi atau langsung login.');
+                    toggleAuthMode();
+                }
+            } catch (error) {
+                showNotification('Terjadi Kesalahan', error.message || 'Gagal memproses autentikasi.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
+        }
+
+        function showNotification(title, message) {
+            const modal = document.getElementById('notificationModal');
+            const card = document.getElementById('notificationCard');
+            const titleEl = document.getElementById('notifTitle');
+            const msgEl = document.getElementById('notifMessage');
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                card.classList.remove('scale-95');
+                card.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeNotification() {
+            const modal = document.getElementById('notificationModal');
+            const card = document.getElementById('notificationCard');
+            
+            modal.classList.add('opacity-0');
+            card.classList.remove('scale-100');
+            card.classList.add('scale-95');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
